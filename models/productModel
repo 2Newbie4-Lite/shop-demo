@@ -10,7 +10,7 @@ const products = [
   { id: 9, name: "Mũ Lưỡi Trai",price: 120000, image: "🧢", category: "Phụ kiện" },
   { id: 10, name: "Túi Xách",   price: 280000, image: "👜", category: "Phụ kiện" },
   { id: 11, name: "Kính râm",   price: 99000, image: "🕶️", category: "Phụ kiện" },
-  { id: 12, name: "Diamond",   price: 10000000, image: "💎", category: "Phụ kiện" },
+  { id: 12, name: "Diamond",   price: 1000000000, image: "💎", category: "Phụ kiện" },
   
 
 
