@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Shop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    header { background: #1a1a2e; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    header h1 { font-size: 22px; }
+    #cart-btn { background: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; }
+    main { max-width: 1100px; margin: 32px auto; padding: 0 16px; }
+    .search-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .search-bar input { flex: 1; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #ddd; font-size: 15px; min-width: 200px; }
+    .search-bar select { padding: 10px 14px; border-radius: 8px; border: 1.5px solid #ddd; font-size: 15px; }
+    #products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .product-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .product-card .emoji { font-size: 64px; }
+    .product-card h3 { margin: 10px 0 6px; font-size: 16px; }
+    .product-card .price { color: #e94560; font-weight: 700; font-size: 18px; margin-bottom: 12px; }
+    .product-card button { background: #1a1a2e; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 15px; }
+    #cart-panel { display: none; position: fixed; right: 0; top: 0; width: 380px; height: 100vh; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.15); padding: 24px; overflow-y: auto; z-index: 200; }
+    #cart-panel h2 { margin-bottom: 20px; color: #1a1a2e; }
+    .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .cart-item .emoji { font-size: 36px; }
+    .cart-item .info { flex: 1; }
+    .cart-item .info h4 { font-size: 14px; }
+    .cart-item .info p { color: #e94560; font-weight: 600; font-size: 14px; }
+    .cart-item button { background: #fee; color: #e94560; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    #cart-total { margin-top: 16px; font-size: 18px; font-weight: 700; text-align: right; color: #1a1a2e; }
+    #checkout-btn { background: #e94560; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 700; margin-top: 12px; }
+    #close-cart { background: #f0f0f0; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 8px; font-size: 15px; }
+    #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 150; }
+    #checkout-panel { display: none; position: fixed; inset: 0; z-index: 300; justify-content: center; align-items: center; }
+    .checkout-box { background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 440px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .checkout-box h2 { margin-bottom: 20px; color: #1a1a2e; }
+    .checkout-box label { font-weight: 600; color: #444; display: block; margin-top: 14px; }
+    .checkout-box input { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #ddd; font-size: 15px; margin-top: 6px; }
+    .checkout-box .err { color: #e94560; font-size: 13px; margin-top: 4px; }
+    #place-order-btn { background: #e94560; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 700; margin-top: 20px; }
+    #cancel-checkout { background: #f0f0f0; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 15px; margin-top: 8px; }
+    #success-panel { display: none; position: fixed; inset: 0; z-index: 400; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); }
+    .success-box { background: white; border-radius: 16px; padding: 40px; text-align: center; max-width: 400px; width: 100%; }
+    .success-box .icon { font-size: 64px; margin-bottom: 16px; }
+    .success-box h2 { color: #1a1a2e; margin-bottom: 8px; }
+    .success-box p { color: #666; margin-bottom: 20px; }
+    .success-box button { background: #1a1a2e; color: white; border: none; padding: 12px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛍️ Shop</h1>
+  <button id="cart-btn">🛒 Giỏ hàng (<span id="cart-count">0</span>)</button>
+</header>
+
+<main>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="🔍 Tìm kiếm sản phẩm..." oninput="searchProducts()">
+    <select id="category-select" onchange="searchProducts()">
+      <option value="">Tất cả danh mục</option>
+      <option value="Áo">Áo</option>
+      <option value="Quần">Quần</option>
+      <option value="Giày">Giày</option>
+      <option value="Phụ kiện">Phụ kiện</option>
+    </select>
+  </div>
+  <div id="products-grid"></div>
+</main>
+
+<div id="overlay"></div>
+
+<!-- Giỏ hàng -->
+<div id="cart-panel">
+  <h2>🛒 Giỏ hàng</h2>
+  <div id="cart-items"></div>
+  <div id="cart-total"></div>
+  <button id="checkout-btn" onclick="openCheckout()">💳 Thanh toán</button>
+  <button id="close-cart" onclick="closeCart()">✕ Đóng</button>
+</div>
+
+<!-- Form thanh toán -->
+<div id="checkout-panel">
+  <div class="checkout-box">
+    <h2>💳 Thông tin đặt hàng</h2>
+    <label>Họ tên</label>
+    <input type="text" id="name" placeholder="Nguyễn Văn A">
+    <div class="err" id="err-name"></div>
+    <label>Số điện thoại</label>
+    <input type="text" id="phone" placeholder="0xxxxxxxxx">
+    <div class="err" id="err-phone"></div>
+    <label>Địa chỉ giao hàng</label>
+    <input type="text" id="address" placeholder="123 Đường ABC, Quận 1, TP.HCM">
+    <div class="err" id="err-address"></div>
+    <button id="place-order-btn" onclick="placeOrder()">🎉 Đặt hàng</button>
+    <button id="cancel-checkout" onclick="closeCheckout()">← Quay lại</button>
+  </div>
+</div>
+
+<!-- Thành công -->
+<div id="success-panel">
+  <div class="success-box">
+    <div class="icon">🎉</div>
+    <h2>Đặt hàng thành công!</h2>
+    <p id="success-msg"></p>
+    <button onclick="closeSuccess()">🛍️ Tiếp tục mua sắm</button>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000/api';
+  const fmt = (p) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p);
+
+  async function searchProducts() {
+    const keyword = document.getElementById('search-input').value;
+    const category = document.getElementById('category-select').value;
+    const params = new URLSearchParams();
+    if (keyword) params.append('keyword', keyword);
+    if (category) params.append('category', category);
+    const res = await fetch(`${API}/products/search?${params}`);
+    const { data } = await res.json();
+    renderProducts(data);
+  }
+
+  async function loadProducts() {
+    const res = await fetch(`${API}/products`);
+    const { data } = await res.json();
+    renderProducts(data);
+  }
+
+  function renderProducts(data) {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = data.length === 0
+      ? '<p style="color:#aaa;grid-column:1/-1;text-align:center;padding:40px">Không tìm thấy sản phẩm</p>'
+      : data.map(p => `
+        <div class="product-card">
+          <div class="emoji">${p.image}</div>
+          <h3>${p.name}</h3>
+          <div class="price">${fmt(p.price)}</div>
+          <button onclick="addToCart(${p.id})">🛒 Thêm vào giỏ</button>
+        </div>
+      `).join('');
+  }
+
+  async function addToCart(productId) {
+    await fetch(`${API}/cart/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    });
+    loadCart();
+  }
+
+  async function removeFromCart(id) {
+    await fetch(`${API}/cart/remove/${id}`, { method: 'DELETE' });
+    loadCart();
+  }
+
+  async function loadCart() {
+    const res = await fetch(`${API}/cart`);
+    const { data, total } = await res.json();
+    document.getElementById('cart-count').textContent = data.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cart-items').innerHTML = data.length === 0
+      ? '<p style="color:#aaa;text-align:center;margin-top:40px">Giỏ hàng trống</p>'
+      : data.map(i => `
+        <div class="cart-item">
+          <div class="emoji">${i.image}</div>
+          <div class="info">
+            <h4>${i.name} x${i.qty}</h4>
+            <p>${fmt(i.price * i.qty)}</p>
+          </div>
+          <button onclick="removeFromCart(${i.id})">✕</button>
+        </div>
+      `).join('');
+    document.getElementById('cart-total').innerHTML = data.length
+      ? `Tổng: <span style="color:#e94560">${fmt(total)}</span>` : '';
+    document.getElementById('checkout-btn').style.display = data.length ? 'block' : 'none';
+  }
+
+  function openCheckout() {
+    closeCart();
+    document.getElementById('checkout-panel').style.display = 'flex';
+  }
+
+  function closeCheckout() {
+    document.getElementById('checkout-panel').style.display = 'none';
+    document.getElementById('cart-panel').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+  }
+
+  async function placeOrder() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    document.getElementById('err-name').textContent = '';
+    document.getElementById('err-phone').textContent = '';
+    document.getElementById('err-address').textContent = '';
+
+    let valid = true;
+    if (!name) { document.getElementById('err-name').textContent = 'Vui lòng nhập họ tên'; valid = false; }
+    if (!phone || !/^0\d{9}$/.test(phone)) { document.getElementById('err-phone').textContent = 'Số điện thoại không hợp lệ'; valid = false; }
+    if (!address) { document.getElementById('err-address').textContent = 'Vui lòng nhập địa chỉ'; valid = false; }
+    if (!valid) return;
+
+    const res = await fetch(`${API}/orders/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, address })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('checkout-panel').style.display = 'none';
+      document.getElementById('success-msg').textContent = `Cảm ơn ${name}! Đơn hàng của bạn đang được xử lý.`;
+      document.getElementById('success-panel').style.display = 'flex';
+      loadCart();
+    }
+  }
+
+  function closeSuccess() {
+    document.getElementById('success-panel').style.display = 'none';
+  }
+
+  document.getElementById('cart-btn').onclick = () => {
+    document.getElementById('cart-panel').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    loadCart();
+  };
+
+  function closeCart() {
+    document.getElementById('cart-panel').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  document.getElementById('overlay').onclick = closeCart;
+
+  loadProducts();
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+const products = [
+  { id: 1, name: "Áo Thun Nam", price: 150000, image: "👕", category: "Áo" },
+  { id: 2, name: "Áo Thun Nữ",   price: 150000, image: "👚", category: "Áo" },
+  { id: 3, name: "Áo Khoác",   price: 550000, image: "🧥", category: "Áo" },
+  { id: 4, name: "Áo thể thao",   price: 200000, image: "🎽", category: "Áo" },
+  { id: 5, name: "Áo sơ mi",   price: 500000, image: "👔", category: "Áo" },
+  { id: 6, name: "Quần đùi nam",   price: 120000, image: "🩳", category: "Quần" },
+  { id: 7, name: "Quần Jean",   price: 350000, image: "👖", category: "Quần" },
+  { id: 8, name: "Giày Sneaker",price: 450000, image: "👟", category: "Giày" },
+  { id: 9, name: "Mũ Lưỡi Trai",price: 120000, image: "🧢", category: "Phụ kiện" },
+  { id: 10, name: "Túi Xách",   price: 280000, image: "👜", category: "Phụ kiện" },
+  { id: 11, name: "Kính râm",   price: 99000, image: "🕶️", category: "Phụ kiện" },
+  { id: 12, name: "Diamond",   price: 10000000, image: "💎", category: "Phụ kiện" },
+  
+
+
+  
+];
+
+const getAll = () => products;
+const getById = (id) => products.find(p => p.id === parseInt(id));
+
+module.exports = { getAll, getById };
+
+
+
